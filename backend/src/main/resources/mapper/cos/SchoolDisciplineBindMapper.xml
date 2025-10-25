@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.SchoolDisciplineBindMapper">
+
+    <!-- 分页获取学校专业绑定信息 -->
+    <select id="selectDisciplineBindPage" resultType="java.util.LinkedHashMap">
+        select
+        sdb.id,
+        sdb.school_id,
+        sdb.discipline_id,
+        sdb.index_no,
+        ss.name as schoolName,
+        ss.city,
+        ss.province,
+        ss.manage,
+        ss.`level`,
+        di.name as disciplineName,
+        di.employment
+        from
+        school_discipline_bind sdb
+        left join sys_school ss on
+        (ss.id = sdb.school_id)
+        left join discipline_info di on
+        (di.id = sdb.discipline_id)
+        where
+        1 = 1
+        <if test="schoolDisciplineBind.schoolName != null and schoolDisciplineBind.schoolName != ''">
+            AND ss.name LIKE CONCAT('%',#{schoolDisciplineBind.schoolName},'%')
+        </if>
+        <if test="schoolDisciplineBind.disciplineName != null and schoolDisciplineBind.disciplineName != ''">
+            AND di.name LIKE CONCAT('%',#{schoolDisciplineBind.disciplineName},'%')
+        </if>
+        <if test="schoolDisciplineBind.employment != null and schoolDisciplineBind.employment != ''">
+            AND di.employment LIKE CONCAT('%',#{schoolDisciplineBind.employment},'%')
+        </if>
+        <if test="schoolDisciplineBind.schoolId != null and schoolDisciplineBind.schoolId != ''">
+            AND ss.user_id = #{schoolDisciplineBind.schoolId}
+        </if>
+        order by
+        sdb.school_id,
+        sdb.index_no desc
+    </select>
+
+    <!-- 根据学校ID获取绑定信息 -->
+    <select id="selectBindBySchool" resultType="java.util.LinkedHashMap">
+        select
+        pf.id,
+        pf.discipline_type,
+        pf.feature_flag,
+        pf.school_id,
+        pf.id,
+        pf.discipline_type_code,
+        pf.discipline_code,
+        ss.name as schoolName,
+        ss.manage,
+        ss.address,
+        ss.longitude,
+        ss.latitude,
+        ss.`level`,
+        di.id as disciplineId,
+        di.name as disciplineName,
+        di.employment
+        from
+        professional pf
+        left join sys_school ss on
+        (ss.id = pf.school_id)
+        left join discipline_info di on
+        (di.code = pf.discipline_code)
+        where
+        1 = 1
+        AND pf.school_id = #{schoolId}
+    </select>
+</mapper>

@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cc.mrbird.febs.cos.dao.ScoreLineInfoMapper">
+
+    <!-- 分页获取学校专业绑定信息 -->
+    <select id="selectScoreLinePage" resultType="java.util.LinkedHashMap">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.address,
+        ss.city,
+        ss.province,
+        ss.manage,
+        ss.`level`,
+        di.name as disciplineName,
+        di.employment
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        AND sli.template_flag = '0'
+        <if test="scoreLineInfo.schoolName != null and scoreLineInfo.schoolName != ''">
+            AND ss.name LIKE CONCAT('%',#{scoreLineInfo.schoolName},'%')
+        </if>
+        <if test="scoreLineInfo.disciplineName != null and scoreLineInfo.disciplineName != ''">
+            AND di.name LIKE CONCAT('%',#{scoreLineInfo.disciplineName},'%')
+        </if>
+        <if test="scoreLineInfo.type != null and scoreLineInfo.type != ''">
+            AND sli.type = #{scoreLineInfo.type}
+        </if>
+        <if test="scoreLineInfo.year != null and scoreLineInfo.year != ''">
+            AND sli.year = #{scoreLineInfo.year}
+        </if>
+        <if test="scoreLineInfo.schoolId != null and scoreLineInfo.schoolId != ''">
+            AND ss.user_id = #{scoreLineInfo.schoolId}
+        </if>
+        order by
+        sli.`year` desc
+    </select>
+
+    <!-- 分页获取推荐学校专业绑定信息 -->
+    <select id="selectScoreLineRecommendPage" resultType="java.util.LinkedHashMap">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.address,
+        ss.city,
+        ss.province,
+        ss.manage,
+        ss.`level`,
+        di.id as disciplineId,
+        di.name as disciplineName,
+        di.employment
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        AND sli.template_flag = '0'
+        <if test="scoreLineInfo.schoolName != null and scoreLineInfo.schoolName != ''">
+            AND ss.name LIKE CONCAT('%',#{scoreLineInfo.schoolName},'%')
+        </if>
+        <if test="scoreLineInfo.type != null and scoreLineInfo.type != ''">
+            AND sli.type = #{scoreLineInfo.type}
+        </if>
+        <if test="scoreLineInfo.score != null">
+            AND sli.score &lt;= #{scoreLineInfo.score}
+        </if>
+        <if test="scoreLineInfo.year != null and scoreLineInfo.year != ''">
+            AND sli.year = #{scoreLineInfo.year}
+        </if>
+        and 1 = 1
+        <if test="schoolIdList != null and schoolIdList.size() > 0">
+            and (sli.school_id in
+            <foreach collection="schoolIdList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="disciplineIdList != null and disciplineIdList.size() > 0">
+                or di.id in
+                <foreach collection="disciplineIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>)
+        </if>
+        order by
+        sli.`school_id` desc
+    </select>
+
+    <!-- 分页获取学校专业绑定信息 -->
+    <select id="selectScoreLineRecommend" resultType="cc.mrbird.febs.cos.entity.vo.ScoreLineRecommendVo">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.address,
+        ss.city,
+        ss.province,
+        ss.manage,
+        ss.`level`,
+        di.id as disciplineId,
+        di.name as disciplineName,
+        di.employment
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        AND sli.template_flag = '0'
+        <if test="scoreLineInfo.schoolName != null and scoreLineInfo.schoolName != ''">
+            AND ss.name LIKE CONCAT('%',#{scoreLineInfo.schoolName},'%')
+        </if>
+        <if test="scoreLineInfo.type != null and scoreLineInfo.type != ''">
+            AND sli.type = #{scoreLineInfo.type}
+        </if>
+        <if test="scoreLineInfo.score != null">
+            AND sli.score &lt;= #{scoreLineInfo.score}
+        </if>
+        <if test="scoreLineInfo.year != null and scoreLineInfo.year != ''">
+            AND sli.year = #{scoreLineInfo.year}
+        </if>
+        and 1 = 1
+        <if test="schoolIdList != null and schoolIdList.size() > 0">
+            and (sli.school_id in
+            <foreach collection="schoolIdList" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+            <if test="disciplineIdList != null and disciplineIdList.size() > 0">
+                or di.id in
+                <foreach collection="disciplineIdList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>)
+        </if>
+        order by
+        sli.`school_id` desc
+    </select>
+
+    <!-- 根据学校ID获取招生信息 -->
+    <select id="selectScoreLineBySchoolId" resultType="java.util.LinkedHashMap">
+        select sli.id,
+               sli.school_id,
+               sli.discipline_code,
+               sli.`type`,
+               sli.score,
+               sli.template_flag,
+               sli.`year`,
+               sli.admissions,
+               ss.name as schoolName,
+               ss.address,
+               ss.city,
+               ss.province,
+               ss.manage,
+               ss.`level`,
+               di.name as disciplineName,
+               di.employment,
+               di.remark
+        from score_line_info sli
+                 left join sys_school ss on
+            (ss.id = sli.school_id)
+                 left join discipline_info di on
+            (di.code = sli.discipline_code)
+        where 1 = 1
+          AND sli.school_id = #{schoolId}
+    </select>
+
+    <!-- 根据学校获取分数线 -->
+    <select id="selectScoreLineBySchool" resultType="java.util.LinkedHashMap">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.city,
+        ss.province,
+        ss.manage,
+        ss.`level`,
+        di.name as disciplineName,
+        di.employment,
+        di.remark
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        AND sli.school_id = #{schoolId}
+        AND sli.template_flag = '0'
+        <if test="year != null and year != ''">
+            AND sli.year = #{year}
+        </if>
+        order by
+        sli.`year` desc
+    </select>
+
+    <!-- 根据学校获取分数线 -->
+    <select id="selectScoreLineBySchoolIds" resultType="cc.mrbird.febs.cos.entity.vo.ScoreLineVo">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.area,
+        ss.manage,
+        ss.`level`,
+        di.name as disciplineName,
+        di.employment
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        <if test="schoolIds != null and schoolIds.size > 0">
+            AND sli.school_id in
+            <foreach collection="schoolIds" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        AND sli.template_flag = '0'
+        <if test="year != null and year != ''">
+            AND sli.year = #{year}
+        </if>
+        order by
+        sli.`year` desc
+    </select>
+
+    <!-- 查询默认分数线 -->
+    <select id="selectScoreLineDefault" resultType="java.util.LinkedHashMap">
+        select
+        sli.id,
+        sli.school_id,
+        sli.discipline_code,
+        sli.`type`,
+        sli.score,
+        sli.template_flag,
+        sli.`year`,
+        sli.admissions,
+        ss.name as schoolName,
+        ss.area,
+        ss.manage,
+        ss.`level`,
+        di.name as disciplineName,
+        di.employment
+        from
+        score_line_info sli
+        left join sys_school ss on
+        (ss.id = sli.school_id)
+        left join discipline_info di on
+        (di.code = sli.discipline_code)
+        where
+        1 = 1
+        AND sli.template_flag = '1'
+        order by
+        sli.`year` desc
+    </select>
+
+    <!-- 查询默认分数线 -->
+    <select id="selectScoreLineDefaultFix" resultType="cc.mrbird.febs.cos.entity.vo.ScoreLineVo">
+        select
+            sli.id,
+            sli.school_id,
+            sli.discipline_code,
+            sli.`type`,
+            sli.score,
+            sli.template_flag,
+            sli.`year`,
+            sli.admissions,
+            ss.name as schoolName,
+            ss.area,
+            ss.manage,
+            ss.`level`,
+            di.name as disciplineName,
+            di.employment
+        from
+            score_line_info sli
+                left join sys_school ss on
+                (ss.id = sli.school_id)
+                left join discipline_info di on
+                (di.code = sli.discipline_code)
+        where
+            1 = 1
+          AND sli.template_flag = '1'
+        order by
+            sli.`year` desc
+    </select>
+</mapper>
