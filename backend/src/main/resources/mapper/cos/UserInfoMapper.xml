@@ -5,38 +5,40 @@
     <!-- 分页获取学生信息 -->
     <select id="selectUserPage" resultType="java.util.LinkedHashMap">
         select
-        `id`,
-        code,
-        name,
-        sex,
-        birthday,
-        id_card,
-        native_place,
-        address,
-        email,
-        `type`,
-        images,
-        create_date,
-        remark,
-        score,
-        user_id
+        ui.`id`,
+        ui.code,
+        ui.name,
+        ui.sex,
+        ui.birthday,
+        ui.id_card,
+        ui.native_place,
+        ui.address,
+        ui.email,
+        ui.`type`,
+        ui.images,
+        ui.create_date,
+        ui.remark,
+        ui.score,
+        ui.user_id,
+        tu.status
         from
-        user_info
+        user_info ui
+        LEFT JOIN t_user tu ON (tu.user_id = ui.user_id)
         where
         1 = 1
         <if test="userInfo.name != null and userInfo.name != ''">
-            AND name LIKE CONCAT('%',#{userInfo.name},'%')
+            AND ui.name LIKE CONCAT('%',#{userInfo.name},'%')
         </if>
         <if test="userInfo.code != null and userInfo.code != ''">
-            AND code LIKE CONCAT('%',#{userInfo.code},'%')
+            AND ui.code LIKE CONCAT('%',#{userInfo.code},'%')
         </if>
         <if test="userInfo.type != null and userInfo.type != ''">
-            AND type= #{userInfo.type}
+            AND ui.type= #{userInfo.type}
         </if>
         <if test="userInfo.idCard != null and userInfo.idCard != ''">
-            AND id_card LIKE CONCAT('%',#{userInfo.idCard},'%')
+            AND ui.id_card LIKE CONCAT('%',#{userInfo.idCard},'%')
         </if>
         order by
-        create_date desc
+        ui.create_date desc
     </select>
 </mapper>

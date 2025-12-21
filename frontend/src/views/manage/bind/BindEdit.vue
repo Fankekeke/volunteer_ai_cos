@@ -204,7 +204,7 @@ export default {
         values.images = images.length > 0 ? images.join(',') : null
         if (!err) {
           this.loading = true
-          this.$put('/cos/school-discipline-bind', {
+          this.$put('/cos/professional', {
             ...values
           }).then((r) => {
             this.reset()

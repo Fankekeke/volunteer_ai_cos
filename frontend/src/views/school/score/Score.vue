@@ -134,7 +134,7 @@ export default {
         data: null
       },
       queryParams: {
-        year: '2024'
+        year: '2025'
       },
       filteredInfo: null,
       sortedInfo: null,

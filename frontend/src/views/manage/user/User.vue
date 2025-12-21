@@ -64,8 +64,8 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon type="cloud" @click="handleUserViewOpen(record)" title="详 情" style="margin-right: 10px"></a-icon>
           <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-right: 10px"></a-icon>
-<!--          <a-icon v-if="record.status == 0" type="caret-up" @click="audit(record.id, 1)" title="up" style="margin-right: 10px"></a-icon>-->
-<!--          <a-icon v-if="record.status == 1" type="caret-down" @click="audit(record.id, 0)" title="down" style="margin-right: 10px"></a-icon>-->
+          <a-icon v-if="record.status == 0" type="caret-up" @click="audit(record.id, 1)" title="up" style="margin-right: 10px"></a-icon>
+          <a-icon v-if="record.status == 1" type="caret-down" @click="audit(record.id, 0)" title="down" style="margin-right: 10px"></a-icon>
         </template>
       </a-table>
     </div>
@@ -144,6 +144,19 @@ export default {
         title: '学生姓名',
         dataIndex: 'name'
       }, {
+        title: '账户状态',
+        dataIndex: 'status',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case '1':
+              return <a-tag color="green">正常</a-tag>
+            case '0':
+              return <a-tag color="red">锁定</a-tag>
+            default:
+              return '- -'
+          }
+        }
+      }, {
         title: '用户头像',
         dataIndex: 'images',
         customRender: (text, record, index) => {
@@ -216,7 +229,7 @@ export default {
   },
   methods: {
     audit (userId, flag) {
-      this.$post('/cos/user-info/user/audit', {userId, flag}).then((r) => {
+      this.$get('/cos/user-info/userAudit', {userId, flag}).then((r) => {
         this.$message.success('修改成功！')
         this.fetch()
       })

@@ -1,8 +1,8 @@
 {
-  "name": "febs-front",
+  "name": "f1k2-front",
   "version": "1.0.0",
-  "description": "FEBS Front By Vue",
-  "author": "mrbrid <https://mrbrid.cc>",
+  "description": "FanK fan1ke2ke@gmail.com（悲伤的橘子树）",
+  "author": "fank <https://berserker287.github.io/>",
   "private": true,
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "ant-design-vue": "1.5.2",
+    "apexcharts": "^3.53.0",
     "axios": "^0.18.0",
     "babel-polyfill": "^6.26.0",
     "browserslist": "^3.2.8",
@@ -21,8 +22,10 @@
     "date-fns": "^1.29.0",
     "echarts": "^4.5.0",
     "enquire.js": "^2.1.6",
+    "marked": "^16.4.1",
     "vue": "2.6.10",
     "vue-apexcharts": "^1.6.2",
+    "vue-markdown": "^2.2.4",
     "vue-meta": "^2.3.3",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.16.0",

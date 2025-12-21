@@ -1,6 +1,8 @@
 server:
   port: 9527
 
+ai-api-key: sk-ebb4821588054a66aa1951d7f239f77c
+
 minio:
   host: http://127.0.0.1:9000
   url: ${minio.host}/${minio.bucket}/
@@ -112,6 +114,6 @@ febs:
         num: 1000
   shiro:
     # 后端免认证接口 url
-    anonUrl: /login,/logout/**,/regist,/regist/user,/user/check/**,/file/**,/api/**,/imagesWeb/**,/cos/enterprise-info/**,/cos/**,/minio/**
+    anonUrl: /login,/logout/**,/regist,/regist/user,/user/check/**,/file/**,/api/**,/imagesWeb/**,/cos/enterprise-info/**,/cos/**,/minio/**,/cos/ai/**
     # token有效期，单位秒
     jwtTimeOut: 3600

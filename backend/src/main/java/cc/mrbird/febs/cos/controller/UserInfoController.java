@@ -1,11 +1,14 @@
 package cc.mrbird.febs.cos.controller;
 
 
+import cc.mrbird.febs.common.service.CacheService;
 import cc.mrbird.febs.common.utils.R;
 import cc.mrbird.febs.cos.entity.BulletinInfo;
 import cc.mrbird.febs.cos.entity.UserInfo;
 import cc.mrbird.febs.cos.service.IBulletinInfoService;
 import cc.mrbird.febs.cos.service.IUserInfoService;
+import cc.mrbird.febs.system.domain.User;
+import cc.mrbird.febs.system.service.UserService;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,11 @@ public class UserInfoController {
 
     private final IBulletinInfoService bulletinInfoService;
 
+    private final UserService userService;
+
+    @Autowired
+    private CacheService cacheService;
+
     /**
      * 分页获取学生信息
      *
@@ -40,6 +48,20 @@ public class UserInfoController {
     @GetMapping("/page")
     public R page(Page<UserInfo> page, UserInfo userInfo) {
         return R.ok(userInfoService.selectUserPage(page, userInfo));
+    }
+
+    @GetMapping("/userAudit")
+    public R userAudit(Integer userId, Integer flag) throws Exception {
+        UserInfo user = userInfoService.getById(userId);
+        User tuser = userService.getById(user.getUserId());
+        tuser.setStatus(String.valueOf(flag));
+        userService.updateById(tuser);
+
+        // 重新将用户信息，用户角色信息，用户权限信息 加载到 redis中
+        cacheService.saveUser(tuser.getUsername());
+        cacheService.saveRoles(tuser.getUsername());
+        cacheService.savePermissions(tuser.getUsername());
+        return R.ok(true);
     }
 
     /**
