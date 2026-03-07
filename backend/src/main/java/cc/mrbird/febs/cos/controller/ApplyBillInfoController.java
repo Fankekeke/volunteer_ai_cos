@@ -1,6 +1,7 @@
 package cc.mrbird.febs.cos.controller;
 
 
+import cc.mrbird.febs.common.exception.FebsException;
 import cc.mrbird.febs.common.utils.R;
 import cc.mrbird.febs.cos.entity.ApplyBillInfo;
 import cc.mrbird.febs.cos.entity.UserInfo;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 志愿申请 控制层
@@ -98,15 +100,60 @@ public class ApplyBillInfoController {
      * @return 结果
      */
     @PutMapping
-    public R edit(ApplyBillInfo applyBillInfo) {
-        if (StrUtil.isNotEmpty(applyBillInfo.getStatus()) && "2".equals(applyBillInfo.getStatus())) {
-            applyBillInfo.setUserConfirmDate(DateUtil.formatDateTime(new Date()));
+    public R edit(ApplyBillInfo applyBillInfo) throws FebsException {
+        ApplyBillInfo applyBillInfo1 = applyBillInfoService.getById(applyBillInfo.getId());
+        List<ApplyBillInfo> list = applyBillInfoService.list(Wrappers.<ApplyBillInfo>lambdaQuery().eq(ApplyBillInfo::getUserId, applyBillInfo1.getUserId()));
+        if (list.size() < 3) {
+            throw new FebsException("当前学生志愿未全部提交");
         }
-        if (StrUtil.isNotEmpty(applyBillInfo.getStatus()) && "3".equals(applyBillInfo.getStatus())) {
-            applyBillInfo.setSchoolConfirmDate(DateUtil.formatDateTime(new Date()));
-        }
+        // 验证志愿顺序录取逻辑
+        validateVolunteerSequence(list, applyBillInfo1);
+        applyBillInfo.setSchoolConfirmDate(DateUtil.formatDateTime(new Date()));
         return R.ok(applyBillInfoService.updateById(applyBillInfo));
     }
+
+    /**
+     * 验证志愿顺序录取逻辑
+     * 只有前一个志愿录取失败，后一个志愿才能进行审核
+     *
+     * @param allVolunteers 该学生的所有志愿
+     * @param currentVolunteer 当前待审核的志愿
+     */
+    private void validateVolunteerSequence(List<ApplyBillInfo> allVolunteers, ApplyBillInfo currentVolunteer) throws FebsException {
+        Integer currentIndexNo = currentVolunteer.getIndexNo();
+
+        // 如果是第一志愿，可以直接审核
+        if (currentIndexNo == null || currentIndexNo == 1) {
+            return;
+        }
+
+        // 获取前一个志愿
+        Optional<ApplyBillInfo> previousVolunteerOpt = allVolunteers.stream()
+                .filter(v -> v.getIndexNo() != null && v.getIndexNo() == currentIndexNo - 1)
+                .findFirst();
+
+        if (!previousVolunteerOpt.isPresent()) {
+            throw new FebsException("前一个志愿不存在，无法进行审核");
+        }
+
+        ApplyBillInfo previousVolunteer = previousVolunteerOpt.get();
+
+        // 检查前一个志愿是否已审核
+        if (StrUtil.isEmpty(previousVolunteer.getStatus()) || "1".equals(previousVolunteer.getStatus())) {
+            throw new FebsException("前一个志愿尚未进行审核，无法审核当前志愿");
+        }
+
+        // 如果前一个志愿已录取（状态="3"），则当前志愿不能审核
+        if ("3".equals(previousVolunteer.getStatus())) {
+            throw new FebsException("前一个志愿已被录取，当前志愿不能进行审核");
+        }
+
+        // 只有前一个志愿未录取（状态="2"），当前志愿才能审核
+        if (!"2".equals(previousVolunteer.getStatus())) {
+            throw new FebsException("前一个志愿状态异常，无法审核当前志愿");
+        }
+    }
+
 
     /**
      * 删除志愿申请信息

@@ -4,32 +4,32 @@
       <!-- 搜索区域 -->
       <a-form layout="horizontal">
         <a-row :gutter="15">
-          <div :class="advanced ? null: 'fold'">
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="学生姓名"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.userName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="学校名称"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.schoolName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="专业名称"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.disciplineName"/>
-              </a-form-item>
-            </a-col>
-          </div>
+<!--          <div :class="advanced ? null: 'fold'">-->
+<!--            <a-col :md="6" :sm="24">-->
+<!--              <a-form-item-->
+<!--                label="学生姓名"-->
+<!--                :labelCol="{span: 5}"-->
+<!--                :wrapperCol="{span: 18, offset: 1}">-->
+<!--                <a-input v-model="queryParams.userName"/>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--            <a-col :md="6" :sm="24">-->
+<!--              <a-form-item-->
+<!--                label="学校名称"-->
+<!--                :labelCol="{span: 5}"-->
+<!--                :wrapperCol="{span: 18, offset: 1}">-->
+<!--                <a-input v-model="queryParams.schoolName"/>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--            <a-col :md="6" :sm="24">-->
+<!--              <a-form-item-->
+<!--                label="专业名称"-->
+<!--                :labelCol="{span: 5}"-->
+<!--                :wrapperCol="{span: 18, offset: 1}">-->
+<!--                <a-input v-model="queryParams.disciplineName"/>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--          </div>-->
           <span style="float: right; margin-top: 3px;">
             <a-button type="primary" @click="search">查询</a-button>
             <a-button style="margin-left: 8px" @click="reset">重置</a-button>
@@ -39,7 +39,7 @@
     </div>
     <div>
       <div class="operator">
-        <a-button type="primary" ghost @click="add">新增</a-button>
+        <a-button type="primary" ghost @click="add" v-if="dataSource.length < 3">新增</a-button>
         <a-button @click="batchDelete">删除</a-button>
       </div>
       <!-- 表格区域 -->
@@ -64,7 +64,7 @@
         </template>
         <template slot="operation" slot-scope="text, record">
 <!--          <a-icon type="cloud" @click="handlewishViewOpen(record)" title="详 情" style="margin-right: 10px"></a-icon>-->
-          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-right: 10px"></a-icon>
+          <a-icon v-if="record.status == 0" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-right: 10px"></a-icon>
         </template>
       </a-table>
     </div>
@@ -181,11 +181,16 @@ export default {
         },
         ellipsis: true
       }, {
-        title: '详细地址',
-        dataIndex: 'address',
+        title: '志愿排名',
+        dataIndex: 'indexNo',
         customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
+          if (text !== null && text !== undefined) {
+            const orderMap = {
+              1: <a-tag color="red">第一志愿</a-tag>,
+              2: <a-tag color="orange">第二志愿</a-tag>,
+              3: <a-tag color="green">第三志愿</a-tag>
+            }
+            return orderMap[text] || <a-tag>{text}</a-tag>
           } else {
             return '- -'
           }
@@ -215,17 +220,6 @@ export default {
               return '- -'
           }
         }
-      }, {
-        title: '就业方向',
-        dataIndex: 'employment',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
       }, {
         title: '操作',
         dataIndex: 'operation',

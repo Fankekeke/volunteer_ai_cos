@@ -39,8 +39,8 @@
         </a-col>
         <a-col :span="8"><b>审核状态：</b>
           <a-tag v-if="applyData.status == 1">发送申请</a-tag>
-          <a-tag v-if="applyData.status == 2" color="red">学校确认</a-tag>
-          <a-tag v-if="applyData.status == 3" color="green">用户确认</a-tag>
+          <a-tag v-if="applyData.status == 2" color="red">未录取</a-tag>
+          <a-tag v-if="applyData.status == 3" color="green">已录取</a-tag>
         </a-col>
         <a-col :span="8"><b>创建时间：</b>
           {{ applyData.createDate ? applyData.createDate : '- -'}}
@@ -62,9 +62,6 @@
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col :span="8"><b>层级：</b>
           {{ applyData.level ? applyData.level : '- -'}}
-        </a-col>
-        <a-col :span="8"><b>学生确认时间：</b>
-          {{ applyData.userConfirmDate ? applyData.userConfirmDate : '- -'}}
         </a-col>
         <a-col :span="8"><b>学校确认时间：</b>
           {{ applyData.schoolConfirmDate ? applyData.schoolConfirmDate : '- -'}}

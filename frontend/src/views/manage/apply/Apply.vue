@@ -145,8 +145,20 @@ export default {
     }),
     columns () {
       return [{
-        title: '申请单号',
-        dataIndex: 'code',
+        title: '志愿排名',
+        dataIndex: 'indexNo',
+        customRender: (text, row, index) => {
+          if (text !== null && text !== undefined) {
+            const orderMap = {
+              1: <a-tag color="red">第一志愿</a-tag>,
+              2: <a-tag color="orange">第二志愿</a-tag>,
+              3: <a-tag color="green">第三志愿</a-tag>
+            }
+            return orderMap[text] || <a-tag>{text}</a-tag>
+          } else {
+            return '- -'
+          }
+        },
         ellipsis: true
       }, {
         title: '学生姓名',
@@ -194,6 +206,10 @@ export default {
         dataIndex: 'schoolName',
         ellipsis: true
       }, {
+        title: '申请专业',
+        dataIndex: 'disciplineName',
+        ellipsis: true
+      }, {
         title: '主管部门',
         dataIndex: 'manage',
         customRender: (text, row, index) => {
@@ -221,9 +237,9 @@ export default {
             case '1':
               return <a-tag>发送申请</a-tag>
             case '2':
-              return <a-tag >学校确认</a-tag>
+              return <a-tag >未录取</a-tag>
             case '3':
-              return <a-tag >用户确认</a-tag>
+              return <a-tag >已录取</a-tag>
             default:
               return '- -'
           }

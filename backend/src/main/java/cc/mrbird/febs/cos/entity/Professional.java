@@ -60,5 +60,6 @@ public class Professional implements Serializable {
      * 专业编号
      */
     private String disciplineCode;
+    private String content;
 
 }

@@ -53,4 +53,22 @@
         uwi.user_id,
         uwi.index_no desc
     </select>
+
+    <!-- 查询热门院校统计 -->
+    <select id="queryWishTopSchool" resultType="java.util.LinkedHashMap">
+        SELECT
+        ss.id AS schoolId,
+        ss.name AS schoolName,
+        ss.province AS province,
+        ss.`level` AS schoolLevel,
+        ss.manage AS manageType,
+        COUNT(uwi.id) AS wishCount
+        FROM user_wish_info uwi
+        INNER JOIN sys_school ss ON uwi.school_id = ss.id
+        GROUP BY ss.id, ss.name, ss.province, ss.`level`, ss.manage
+        ORDER BY wishCount DESC
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
 </mapper>

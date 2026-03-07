@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * 志愿填报 实现层
@@ -28,5 +29,16 @@ public class UserWishInfoServiceImpl extends ServiceImpl<UserWishInfoMapper, Use
     @Override
     public IPage<LinkedHashMap<String, Object>> selectUserWishPage(Page<UserWishInfo> page, UserWishInfo userWishInfo) {
         return baseMapper.selectUserWishPage(page, userWishInfo);
+    }
+
+    /**
+     * 获取志愿填报信息
+     *
+     * @param limit 限制数量
+     * @return 结果
+     */
+    @Override
+    public List<LinkedHashMap<String, Object>> queryWishTopSchool(Integer limit) {
+        return baseMapper.queryWishTopSchool(limit);
     }
 }

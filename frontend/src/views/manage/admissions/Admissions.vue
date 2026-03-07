@@ -7,26 +7,10 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="6" :sm="24">
               <a-form-item
-                label="学生姓名"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.userName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="学校名称"
+                label="所属学校"
                 :labelCol="{span: 5}"
                 :wrapperCol="{span: 18, offset: 1}">
                 <a-input v-model="queryParams.schoolName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="专业名称"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.disciplineName"/>
               </a-form-item>
             </a-col>
           </div>
@@ -54,6 +38,8 @@
                @change="handleTableChange">
         <template slot="titleShow" slot-scope="text, record">
           <template>
+            <a-badge status="processing" v-if="record.rackUp === 1"/>
+            <a-badge status="error" v-if="record.rackUp === 0"/>
             <a-tooltip>
               <template slot="title">
                 {{ record.title }}
@@ -62,56 +48,62 @@
             </a-tooltip>
           </template>
         </template>
+        <template slot="contentShow" slot-scope="text, record">
+          <template>
+            <a-tooltip>
+              <template slot="title">
+                {{ record.content }}
+              </template>
+              {{ record.content.slice(0, 25) }} ...
+            </a-tooltip>
+          </template>
+        </template>
+        <span slot="nameShow" slot-scope="text">{{ text }}</span>
+        <span slot="titleShow" slot-scope="text">{{ text || '-' }}</span>
+        <span slot="contentShow" slot-scope="text">
+          <a-tooltip :title="text">
+            {{ text ? (text.length > 20 ? text.substring(0, 20) + '...' : text) : '-' }}
+          </a-tooltip>
+        </span>
         <template slot="operation" slot-scope="text, record">
-          <a-icon type="cloud" @click="handlewishViewOpen(record)" title="详 情" style="margin-right: 10px"></a-icon>
-<!--          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改" style="margin-right: 10px"></a-icon>-->
+          <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
         </template>
       </a-table>
     </div>
-    <wish-add
-      v-if="wishAdd.visiable"
-      @close="handlewishAddClose"
-      @success="handlewishAddSuccess"
-      :wishAddVisiable="wishAdd.visiable">
-    </wish-add>
-    <wish-edit
-      ref="wishEdit"
-      @close="handlewishEditClose"
-      @success="handlewishEditSuccess"
-      :wishEditVisiable="wishEdit.visiable">
-    </wish-edit>
-    <wish-view
-      @close="handlewishViewClose"
-      :wishShow="wishView.visiable"
-      :wishData="wishView.data">
-    </wish-view>
+    <bulletin-add
+      v-if="bulletinAdd.visiable"
+      @close="handleBulletinAddClose"
+      @success="handleBulletinAddSuccess"
+      :bulletinAddVisiable="bulletinAdd.visiable">
+    </bulletin-add>
+    <bulletin-edit
+      ref="bulletinEdit"
+      @close="handleBulletinEditClose"
+      @success="handleBulletinEditSuccess"
+      :bulletinEditVisiable="bulletinEdit.visiable">
+    </bulletin-edit>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
+import BulletinAdd from './AdmissionsAdd.vue'
+import BulletinEdit from './AdmissionsEdit.vue'
 import {mapState} from 'vuex'
-import wishAdd from './WishAdd.vue'
-import wishEdit from './WishEdit.vue'
-import wishView from './WishView.vue'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
-  name: 'wish',
-  components: {RangeDate, wishAdd, wishEdit, wishView},
+  name: 'Bulletin',
+  components: {BulletinAdd, BulletinEdit, RangeDate},
   data () {
     return {
       advanced: false,
-      wishAdd: {
+      bulletinAdd: {
         visiable: false
       },
-      wishEdit: {
+      bulletinEdit: {
         visiable: false
-      },
-      wishView: {
-        visiable: false,
-        data: null
       },
       queryParams: {},
       filteredInfo: null,
@@ -128,96 +120,28 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
-      wishList: []
+      userList: []
     }
   },
   computed: {
     ...mapState({
-      currentwish: state => state.account.wish
+      currentUser: state => state.account.user
     }),
     columns () {
       return [{
-        title: '学生姓名',
-        dataIndex: 'userName',
-        ellipsis: true
-      }, {
-        title: '类型',
-        dataIndex: 'type',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '1':
-              return <a-tag>文科</a-tag>
-            case '2':
-              return <a-tag >理科</a-tag>
-            default:
-              return '- -'
-          }
-        }
-      }, {
-        title: '头像',
-        dataIndex: 'images',
-        customRender: (text, record, index) => {
-          if (!record.images) return <a-avatar shape="square" icon="apply" />
-          return <a-popover>
-            <template slot="content">
-              <a-avatar shape="square" size={132} icon="apply" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-            </template>
-            <a-avatar shape="square" icon="apply" src={ 'http://127.0.0.1:9527/imagesWeb/' + record.images.split(',')[0] } />
-          </a-popover>
-        }
-      }, {
         title: '学校名称',
-        dataIndex: 'schoolName',
-        ellipsis: true
+        dataIndex: 'name'
       }, {
-        title: '地区',
-        dataIndex: 'city',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
+        title: '招生政策内容',
+        dataIndex: 'content'
       }, {
-        title: '志愿排名',
-        dataIndex: 'indexNo',
+        title: '发布时间',
+        dataIndex: 'createDate',
         customRender: (text, row, index) => {
           if (text !== null && text !== undefined) {
-            const orderMap = {
-              1: <a-tag color="red">第一志愿</a-tag>,
-              2: <a-tag color="orange">第二志愿</a-tag>,
-              3: <a-tag color="green">第三志愿</a-tag>
-            }
-            return orderMap[text] || <a-tag>{text}</a-tag>
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '专业名称',
-        dataIndex: 'disciplineName',
-        customRender: (text, row, index) => {
-          if (text !== null) {
             return text
           } else {
             return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '状态',
-        dataIndex: 'status',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case '0':
-              return <a-tag color="blue">未提交</a-tag>
-            case '1':
-              return <a-tag color="pink">已提交</a-tag>
-            default:
-              return '- -'
           }
         }
       }]
@@ -227,25 +151,6 @@ export default {
     this.fetch()
   },
   methods: {
-    audit (wishId, flag) {
-      this.$post('/cos/wish-info/wish/audit', {wishId, flag}).then((r) => {
-        this.$message.success('修改成功！')
-        this.fetch()
-      })
-    },
-    handlewishViewOpen (row) {
-      this.wishView.data = row
-      this.wishView.visiable = true
-    },
-    handlewishViewClose () {
-      this.wishView.visiable = false
-    },
-    editStatus (row, status) {
-      this.$post('/cos/wish-info/account/status', { staffId: row.id, status }).then((r) => {
-        this.$message.success('修改成功')
-        this.fetch()
-      })
-    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -253,26 +158,26 @@ export default {
       this.advanced = !this.advanced
     },
     add () {
-      this.wishAdd.visiable = true
+      this.bulletinAdd.visiable = true
     },
-    handlewishAddClose () {
-      this.wishAdd.visiable = false
+    handleBulletinAddClose () {
+      this.bulletinAdd.visiable = false
     },
-    handlewishAddSuccess () {
-      this.wishAdd.visiable = false
-      this.$message.success('新增志愿成功')
+    handleBulletinAddSuccess () {
+      this.bulletinAdd.visiable = false
+      this.$message.success('新增招生政策成功')
       this.search()
     },
     edit (record) {
-      this.$refs.wishEdit.setFormValues(record)
-      this.wishEdit.visiable = true
+      this.$refs.bulletinEdit.setFormValues(record)
+      this.bulletinEdit.visiable = true
     },
-    handlewishEditClose () {
-      this.wishEdit.visiable = false
+    handleBulletinEditClose () {
+      this.bulletinEdit.visiable = false
     },
-    handlewishEditSuccess () {
-      this.wishEdit.visiable = false
-      this.$message.success('修改产品成功')
+    handleBulletinEditSuccess () {
+      this.bulletinEdit.visiable = false
+      this.$message.success('修改招生政策成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -290,7 +195,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/user-wish-info/' + ids).then(() => {
+          that.$delete('/cos/admissions-policy/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -360,10 +265,7 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.type === undefined) {
-        delete params.type
-      }
-      this.$get('/cos/user-wish-info/page', {
+      this.$get('/cos/admissions-policy/page', {
         ...params
       }).then((r) => {
         let data = r.data.data

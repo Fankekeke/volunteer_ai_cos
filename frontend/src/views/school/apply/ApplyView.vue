@@ -4,7 +4,10 @@
       <a-button key="pass" @click="onAudit" v-if="applyData.status == 1" type="primary">
         审核通过
       </a-button>
-      <a-button key="back" @click="onClose" type="danger">
+      <a-button key="back" @click="onAudit1" type="danger"  v-if="applyData.status == 1">
+        审核驳回
+      </a-button>
+      <a-button key="back" @click="onClose">
         关闭
       </a-button>
     </template>
@@ -42,8 +45,8 @@
         </a-col>
         <a-col :span="8"><b>审核状态：</b>
           <a-tag v-if="applyData.status == 1">发送申请</a-tag>
-          <a-tag v-if="applyData.status == 2" color="red">学校确认</a-tag>
-          <a-tag v-if="applyData.status == 3" color="green">用户确认</a-tag>
+          <a-tag v-if="applyData.status == 2" color="red">未录取</a-tag>
+          <a-tag v-if="applyData.status == 3" color="green">已录取</a-tag>
         </a-col>
         <a-col :span="8"><b>创建时间：</b>
           {{ applyData.createDate ? applyData.createDate : '- -'}}
@@ -65,9 +68,6 @@
       <a-row style="padding-left: 24px;padding-right: 24px;">
         <a-col :span="8"><b>层级：</b>
           {{ applyData.level ? applyData.level : '- -'}}
-        </a-col>
-        <a-col :span="8"><b>学生确认时间：</b>
-          {{ applyData.userConfirmDate ? applyData.userConfirmDate : '- -'}}
         </a-col>
         <a-col :span="8"><b>学校确认时间：</b>
           {{ applyData.schoolConfirmDate ? applyData.schoolConfirmDate : '- -'}}
@@ -151,6 +151,12 @@ export default {
   },
   methods: {
     onAudit () {
+      let params = { id: this.applyData.id, status: 3 }
+      this.$put('/cos/apply-bill-info', params).then((r) => {
+        this.$emit('success')
+      })
+    },
+    onAudit1 () {
       let params = { id: this.applyData.id, status: 2 }
       this.$put('/cos/apply-bill-info', params).then((r) => {
         this.$emit('success')

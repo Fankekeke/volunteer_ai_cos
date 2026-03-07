@@ -69,11 +69,11 @@
                         </a-col>
                       </a-row>
                     </div>
-                    <div class="apply-button-container">
-                      <a-button type="primary" block @click.stop="apply(item)" class="apply-button">
-                        志愿申请
-                      </a-button>
-                    </div>
+<!--                    <div class="apply-button-container">-->
+<!--                      <a-button type="primary" block @click.stop="apply(item)" class="apply-button">-->
+<!--                        志愿申请-->
+<!--                      </a-button>-->
+<!--                    </div>-->
                   </a-col>
                 </a-row>
               </a-card>

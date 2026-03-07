@@ -13,6 +13,8 @@
         abi.create_date,
         abi.user_confirm_date,
         abi.school_confirm_date,
+        abi.index_no,
+        abi.discipline_id,
         ss.name as schoolName,
         ss.city,
         ss.province,
@@ -25,13 +27,17 @@
         ui.`type`,
         ui.sex,
         ui.images,
-        ui.remark
+        ui.remark,
+        di.name as disciplineName,
+        di.employment
         from
         apply_bill_info abi
         left join sys_school ss on
         (ss.id = abi.school_id)
         left join user_info ui on
         (ui.id = abi.user_id)
+        left join discipline_info di on
+        (di.id = abi.discipline_id)
         where
         1 = 1
         <if test="applyBillInfo.schoolName != null and applyBillInfo.schoolName != ''">

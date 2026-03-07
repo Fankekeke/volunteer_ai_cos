@@ -45,7 +45,7 @@
                         <a-col :span="8">
                           <a-icon type="team" />招生人数：{{ item.admissions }}
                         </a-col>
-                        <a-col :span="24"><a-button type="primary" style="width: 100%;margin-top: 15px" @click="apply(item)">志愿申请</a-button></a-col>
+<!--                        <a-col :span="24"><a-button type="primary" style="width: 100%;margin-top: 15px" @click="apply(item)">志愿申请</a-button></a-col>-->
                       </a-row>
                     </div>
                   </a-col>

@@ -46,6 +46,23 @@
             </a-radio-group>
           </a-form-item>
         </a-col>
+        <a-col :span="24">
+          <div style="border: 1px solid #ccc;">
+            <Toolbar
+              style="border-bottom: 1px solid #ccc"
+              :editor="editor"
+              :defaultConfig="toolbarConfig"
+              :mode="mode"
+            />
+            <Editor
+              style="height: 500px; overflow-y: hidden;"
+              v-model="html"
+              :defaultConfig="editorConfig"
+              :mode="mode"
+              @onCreated="onCreated"
+            />
+          </div>
+        </a-col>
       </a-row>
     </a-form>
   </a-modal>
@@ -54,6 +71,7 @@
 <script>
 import {mapState} from 'vuex'
 import moment from "moment";
+import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 function getBase64 (file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -68,6 +86,7 @@ const formItemLayout = {
 }
 export default {
   name: 'bindAdd',
+  components: { Editor, Toolbar },
   props: {
     bindAddVisiable: {
       default: false
@@ -94,10 +113,23 @@ export default {
       schoolList: [],
       disciplineList: [],
       previewVisible: false,
-      previewImage: ''
+      previewImage: '',
+      editor: null,
+      html: '<p></p>',
+      toolbarConfig: { },
+      editorConfig: { placeholder: '请输入内容...' },
+      mode: 'default'
     }
   },
+  beforeDestroy () {
+    const editor = this.editor
+    if (editor == null) return
+    editor.destroy() // 组件销毁时，及时销毁编辑器
+  },
   methods: {
+    onCreated (editor) {
+      this.editor = Object.seal(editor) // 一定要用 Object.seal() ，否则会报错
+    },
     handleSearch (value) {
       this.schoolList = []
       if (value !== '' && value !== null) {
@@ -144,6 +176,7 @@ export default {
       this.form.validateFields((err, values) => {
         values.images = images.length > 0 ? images.join(',') : null
         values.schoolIdFlag = this.currentUser.userId
+        values.content = this.editor.getHtml()
         // values.birthday = moment(values.birthday).format('YYYY-MM-DD')
         if (!err) {
           this.loading = true
@@ -161,7 +194,7 @@ export default {
   }
 }
 </script>
-
+<style src="@wangeditor/editor/dist/css/style.css"></style>
 <style scoped>
 
 </style>

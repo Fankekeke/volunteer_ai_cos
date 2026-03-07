@@ -1,42 +1,26 @@
 <template>
   <a-card :bordered="false" class="card-area">
-    <div :class="advanced ? 'search' : null">
-      <!-- 搜索区域 -->
-      <a-form layout="horizontal">
-        <a-row :gutter="15">
-          <div :class="advanced ? null: 'fold'">
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="学校名称"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.schoolName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="专业名称"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.disciplineName"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="6" :sm="24">
-              <a-form-item
-                label="专业类型"
-                :labelCol="{span: 5}"
-                :wrapperCol="{span: 18, offset: 1}">
-                <a-input v-model="queryParams.disciplineType"/>
-              </a-form-item>
-            </a-col>
-          </div>
-          <span style="float: right; margin-top: 3px;">
-            <a-button type="primary" @click="search">查询</a-button>
-            <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-          </span>
-        </a-row>
-      </a-form>
-    </div>
+<!--    <div :class="advanced ? 'search' : null">-->
+<!--      &lt;!&ndash; 搜索区域 &ndash;&gt;-->
+<!--      <a-form layout="horizontal">-->
+<!--        <a-row :gutter="15">-->
+<!--          <div :class="advanced ? null: 'fold'">-->
+<!--            <a-col :md="6" :sm="24">-->
+<!--              <a-form-item-->
+<!--                label="所属学校"-->
+<!--                :labelCol="{span: 5}"-->
+<!--                :wrapperCol="{span: 18, offset: 1}">-->
+<!--                <a-input v-model="queryParams.schoolName"/>-->
+<!--              </a-form-item>-->
+<!--            </a-col>-->
+<!--          </div>-->
+<!--          <span style="float: right; margin-top: 3px;">-->
+<!--            <a-button type="primary" @click="search">查询</a-button>-->
+<!--            <a-button style="margin-left: 8px" @click="reset">重置</a-button>-->
+<!--          </span>-->
+<!--        </a-row>-->
+<!--      </a-form>-->
+<!--    </div>-->
     <div>
       <div class="operator">
         <a-button type="primary" ghost @click="add">新增</a-button>
@@ -54,6 +38,8 @@
                @change="handleTableChange">
         <template slot="titleShow" slot-scope="text, record">
           <template>
+            <a-badge status="processing" v-if="record.rackUp === 1"/>
+            <a-badge status="error" v-if="record.rackUp === 0"/>
             <a-tooltip>
               <template slot="title">
                 {{ record.title }}
@@ -62,56 +48,62 @@
             </a-tooltip>
           </template>
         </template>
+        <template slot="contentShow" slot-scope="text, record">
+          <template>
+            <a-tooltip>
+              <template slot="title">
+                {{ record.content }}
+              </template>
+              {{ record.content.slice(0, 25) }} ...
+            </a-tooltip>
+          </template>
+        </template>
+        <span slot="nameShow" slot-scope="text">{{ text }}</span>
+        <span slot="titleShow" slot-scope="text">{{ text || '-' }}</span>
+        <span slot="contentShow" slot-scope="text">
+          <a-tooltip :title="text">
+            {{ text ? (text.length > 20 ? text.substring(0, 20) + '...' : text) : '-' }}
+          </a-tooltip>
+        </span>
         <template slot="operation" slot-scope="text, record">
-<!--          <a-icon type="cloud" @click="handlebindViewOpen(record)" title="详 情" style="margin-right: 10px"></a-icon>-->
           <a-icon type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修 改"></a-icon>
         </template>
       </a-table>
     </div>
-    <bind-add
-      v-if="bindAdd.visiable"
-      @close="handlebindAddClose"
-      @success="handlebindAddSuccess"
-      :bindAddVisiable="bindAdd.visiable">
-    </bind-add>
-    <bind-edit
-      ref="bindEdit"
-      @close="handlebindEditClose"
-      @success="handlebindEditSuccess"
-      :bindEditVisiable="bindEdit.visiable">
-    </bind-edit>
-    <bind-view
-      @close="handlebindViewClose"
-      :bindShow="bindView.visiable"
-      :bindData="bindView.data">
-    </bind-view>
+    <bulletin-add
+      v-if="bulletinAdd.visiable"
+      @close="handleBulletinAddClose"
+      @success="handleBulletinAddSuccess"
+      :bulletinAddVisiable="bulletinAdd.visiable">
+    </bulletin-add>
+    <bulletin-edit
+      ref="bulletinEdit"
+      @close="handleBulletinEditClose"
+      @success="handleBulletinEditSuccess"
+      :bulletinEditVisiable="bulletinEdit.visiable">
+    </bulletin-edit>
   </a-card>
 </template>
 
 <script>
 import RangeDate from '@/components/datetime/RangeDate'
+import BulletinAdd from './AdmissionsAdd.vue'
+import BulletinEdit from './AdmissionsEdit.vue'
 import {mapState} from 'vuex'
-import bindAdd from './BindAdd.vue'
-import bindEdit from './BindEdit.vue'
-import bindView from './BindView.vue'
 import moment from 'moment'
 moment.locale('zh-cn')
 
 export default {
-  name: 'bind',
-  components: {RangeDate, bindAdd, bindEdit, bindView},
+  name: 'Bulletin',
+  components: {BulletinAdd, BulletinEdit, RangeDate},
   data () {
     return {
       advanced: false,
-      bindAdd: {
+      bulletinAdd: {
         visiable: false
       },
-      bindEdit: {
+      bulletinEdit: {
         visiable: false
-      },
-      bindView: {
-        visiable: false,
-        data: null
       },
       queryParams: {},
       filteredInfo: null,
@@ -128,56 +120,28 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
-      bindList: []
+      userList: []
     }
   },
   computed: {
     ...mapState({
-      currentbind: state => state.account.bind,
       currentUser: state => state.account.user
     }),
     columns () {
       return [{
         title: '学校名称',
-        dataIndex: 'schoolName',
-        ellipsis: true
+        dataIndex: 'name'
       }, {
-        title: '学校地址',
-        dataIndex: 'address',
-        ellipsis: true
+        title: '招生政策内容',
+        dataIndex: 'content'
       }, {
-        title: '办学类型',
-        dataIndex: 'schoolType',
+        title: '发布时间',
+        dataIndex: 'createDate',
         customRender: (text, row, index) => {
-          if (text !== null) {
+          if (text !== null && text !== undefined) {
             return text
           } else {
             return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '专业名称',
-        dataIndex: 'disciplineName'
-      }, {
-        title: '就业方向',
-        dataIndex: 'employment',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return text
-          } else {
-            return '- -'
-          }
-        },
-        ellipsis: true
-      }, {
-        title: '特色专业',
-        dataIndex: 'featureFlag',
-        customRender: (text, row, index) => {
-          if (text !== null) {
-            return <a-tag>{{ text }}</a-tag>
-          } else {
-            return '暂无数据'
           }
         }
       }, {
@@ -191,25 +155,6 @@ export default {
     this.fetch()
   },
   methods: {
-    audit (bindId, flag) {
-      this.$post('/cos/bind-info/bind/audit', {bindId, flag}).then((r) => {
-        this.$message.success('修改成功！')
-        this.fetch()
-      })
-    },
-    handlebindViewOpen (row) {
-      this.bindView.data = row
-      this.bindView.visiable = true
-    },
-    handlebindViewClose () {
-      this.bindView.visiable = false
-    },
-    editStatus (row, status) {
-      this.$post('/cos/bind-info/account/status', { staffId: row.id, status }).then((r) => {
-        this.$message.success('修改成功')
-        this.fetch()
-      })
-    },
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
     },
@@ -217,26 +162,26 @@ export default {
       this.advanced = !this.advanced
     },
     add () {
-      this.bindAdd.visiable = true
+      this.bulletinAdd.visiable = true
     },
-    handlebindAddClose () {
-      this.bindAdd.visiable = false
+    handleBulletinAddClose () {
+      this.bulletinAdd.visiable = false
     },
-    handlebindAddSuccess () {
-      this.bindAdd.visiable = false
-      this.$message.success('新增专业绑定成功')
+    handleBulletinAddSuccess () {
+      this.bulletinAdd.visiable = false
+      this.$message.success('新增招生政策成功')
       this.search()
     },
     edit (record) {
-      this.$refs.bindEdit.setFormValues(record)
-      this.bindEdit.visiable = true
+      this.$refs.bulletinEdit.setFormValues(record)
+      this.bulletinEdit.visiable = true
     },
-    handlebindEditClose () {
-      this.bindEdit.visiable = false
+    handleBulletinEditClose () {
+      this.bulletinEdit.visiable = false
     },
-    handlebindEditSuccess () {
-      this.bindEdit.visiable = false
-      this.$message.success('修改产品成功')
+    handleBulletinEditSuccess () {
+      this.bulletinEdit.visiable = false
+      this.$message.success('修改招生政策成功')
       this.search()
     },
     handleDeptChange (value) {
@@ -254,7 +199,7 @@ export default {
         centered: true,
         onOk () {
           let ids = that.selectedRowKeys.join(',')
-          that.$delete('/cos/school-discipline-bind/' + ids).then(() => {
+          that.$delete('/cos/admissions-policy/' + ids).then(() => {
             that.$message.success('删除成功')
             that.selectedRowKeys = []
             that.search()
@@ -324,11 +269,8 @@ export default {
         params.size = this.pagination.defaultPageSize
         params.current = this.pagination.defaultCurrent
       }
-      if (params.type === undefined) {
-        delete params.type
-      }
       params.schoolId = this.currentUser.userId
-      this.$get('/cos/professional/page', {
+      this.$get('/cos/admissions-policy/page', {
         ...params
       }).then((r) => {
         let data = r.data.data
