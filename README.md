@@ -1,4 +1,4 @@
-### 基于Springboot与Vue的高考志愿填报AI分析平台
+### 基于Springboot与Vue的高考志愿填报 AI分析系统
 知识库学校专业匹配、AI智能分析建议
 
 #### 安装环境
